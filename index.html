@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #121212;
-      --card-bg: rgba(36, 36, 36, 0.92); /* Průhlednější karta, aby pod ní vyniklo pozadí */
+      --card-bg: rgba(36, 36, 36, 0.92);
       --accent: #d4af37;
       --accent-hover: #f59e0b;
       --text: #f8fafc;
@@ -19,12 +19,9 @@
 
     body {
       background-color: var(--bg);
-      
-      /* OBRÁZEK NA POZADÍ "offline new.png" */
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
                   url('offline new.png') no-repeat center center fixed;
       background-size: cover;
-      
       color: var(--text);
       display: flex;
       justify-content: center;
@@ -119,7 +116,7 @@
       border-radius: 8px; 
       font-size: 0.85rem; 
       word-break: break-all; 
-      margin-bottom: 15px; 
+      margin-bottom: 12px; 
       color: var(--text-dim); 
       border: 1px solid #27272a; 
     }
@@ -128,7 +125,7 @@
       color: var(--accent);
     }
 
-    .copy-btn { 
+    .action-btn { 
       background: transparent; 
       border: 1px solid var(--accent); 
       color: var(--accent); 
@@ -137,13 +134,32 @@
       cursor: pointer; 
       font-weight: bold; 
       width: 100%; 
+      margin-bottom: 10px;
       transition: all 0.2s ease; 
     }
 
-    .copy-btn:hover { 
+    .action-btn:hover { 
       background: var(--accent); 
       color: #000; 
       box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+    }
+
+    .alert-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .alert-btn:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
     }
   </style>
 </head>
@@ -172,11 +188,13 @@
       Účet: <strong id="ibanDisplay">CZ6601000000436651400267</strong>
     </div>
 
-    <button class="copy-btn" onclick="copyIban()">Zkopírovat číslo účtu</button>
+    <button class="action-btn" onclick="copyIban()">Zkopírovat číslo účtu</button>
+    <button class="alert-btn" id="sendAlertBtn" onclick="sendAlert()">Odeslat alert na stream 🚀</button>
   </div>
 
   <script>
     const MY_IBAN = "CZ6601000000436651400267";
+    const NETLIFY_FUNCTION_URL = "https://majestic-narwhal-f71273.netlify.app/.netlify/functions/send-alert";
 
     document.getElementById('ibanDisplay').innerText = MY_IBAN;
 
@@ -200,6 +218,39 @@
     function copyIban() {
       navigator.clipboard.writeText(MY_IBAN);
       alert("Číslo účtu zkopírováno!");
+    }
+
+    async function sendAlert() {
+      const btn = document.getElementById('sendAlertBtn');
+      const username = document.getElementById('note').value.trim() || 'Anonymní dárce';
+      const amount = document.getElementById('customAmount').value || '100';
+
+      btn.disabled = true;
+      btn.innerText = "Odesílám alert...";
+
+      try {
+        const response = await fetch(NETLIFY_FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username,
+            amount: parseFloat(amount),
+            message: `Zaplaceno přes QR kód (${amount} Kč)`
+          })
+        });
+
+        if (response.ok) {
+          alert("Alert byl úspěšně odeslán na stream!");
+        } else {
+          alert("Chyba při odesílání alertu. Zkontroluj nastavení Netlify.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Nepodařilo se spojit s alert serverem.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Odeslat alert na stream 🚀";
+      }
     }
 
     updateQR();
