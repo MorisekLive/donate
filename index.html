@@ -6,20 +6,25 @@
   <title>Podpora tvorby – QR Donate</title>
   <style>
     :root {
-      /* ŠEDÉ A ZLATÉ TÓNODĚNÍ */
-      --bg: #121212;                  /* Tmavě šedé pozadí stránky */
-      --card-bg: #242424;             /* Šedé pozadí hlavní karty */
-      --accent: #d4af37;              /* Hlavní zlatá barva */
-      --accent-hover: #f59e0b;        /* Jasnější zlatá při najetí/aktivaci */
-      --text: #f8fafc;                  /* Světlý text */
-      --text-dim: #a1a1aa;              /* Tlumený text */
-      --input-bg: #18181b;             /* Tmavší šedá pro vstupy */
+      --bg: #121212;
+      --card-bg: rgba(36, 36, 36, 0.92); /* Průhlednější karta, aby pod ní vyniklo pozadí */
+      --accent: #d4af37;
+      --accent-hover: #f59e0b;
+      --text: #f8fafc;
+      --text-dim: #a1a1aa;
+      --input-bg: #18181b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
 
     body {
       background-color: var(--bg);
+      
+      /* OBRÁZEK NA POZADÍ "offline new.png" */
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                  url('offline new.png') no-repeat center center fixed;
+      background-size: cover;
+      
       color: var(--text);
       display: flex;
       justify-content: center;
@@ -30,12 +35,12 @@
 
     .card {
       background: var(--card-bg);
+      backdrop-filter: blur(8px);
       padding: 30px;
       border-radius: 16px;
       max-width: 440px;
       width: 100%;
       text-align: center;
-      /* Tmavý/černý stín okolo karty pro hloubku */
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(0, 0, 0, 0.5);
       border: 1px solid #3f3f46;
     }
@@ -48,29 +53,31 @@
 
     p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
 
-    /* Mřížka pro 5 tlačítek */
     .amounts { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
+      display: flex; 
+      flex-wrap: wrap;
       gap: 8px; 
       margin-bottom: 15px; 
+      justify-content: center;
     }
 
     .btn { 
+      flex: 1 1 17%;
+      min-width: 60px;
       background: var(--input-bg); 
       color: var(--text); 
       border: 1px solid #3f3f46; 
-      padding: 10px 5px; 
+      padding: 10px 4px; 
       border-radius: 8px; 
       cursor: pointer; 
       font-weight: bold; 
       transition: all 0.2s ease; 
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     .btn:hover, .btn.active { 
       background: var(--accent); 
-      color: #000; /* Černý text na zlatém pozadí pro lepší čitelnost */
+      color: #000; 
       border-color: var(--accent-hover); 
       box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
     }
