@@ -8,6 +8,10 @@
     body {
       font-family: Arial, sans-serif;
       background-color: #18181b;
+      /* Pokud chceš vlastní obrázek na pozadí, odkomentuj řádek níže a vlož odkaz/soubor */
+      /* background-image: url('pozadi.jpg'); */
+      background-size: cover;
+      background-position: center;
       color: #ffffff;
       display: flex;
       justify-content: center;
@@ -18,17 +22,19 @@
       box-sizing: border-box;
     }
     .card {
-      background-color: #27272a;
+      background-color: rgba(39, 39, 42, 0.95);
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       max-width: 400px;
       width: 100%;
       text-align: center;
+      backdrop-filter: blur(5px);
     }
     h1 {
       font-size: 24px;
       margin-bottom: 20px;
+      color: #fff;
     }
     label {
       display: block;
@@ -48,6 +54,26 @@
       box-sizing: border-box;
       font-size: 16px;
     }
+    .amounts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .amount-btn {
+      padding: 10px;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      background-color: #18181b;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .amount-btn:hover, .amount-btn.active {
+      background-color: #9146ff;
+      border-color: #9146ff;
+    }
     .btn {
       width: 100%;
       padding: 12px;
@@ -64,18 +90,16 @@
     .btn:hover {
       background-color: #772ce8;
     }
-    .btn:disabled {
-      background-color: #52525b;
-      cursor: not-allowed;
-    }
     #qrContainer {
       margin-top: 20px;
     }
     #qrCode {
-      max-width: 250px;
+      max-width: 220px;
       width: 100%;
       height: auto;
       border-radius: 8px;
+      background: #fff;
+      padding: 10px;
     }
   </style>
 </head>
@@ -84,71 +108,52 @@
   <div class="card">
     <h1>Podpořit stream 💜</h1>
 
-    <label for="note">Vaše jméno / Nickname:</label>
-    <input type="text" id="note" placeholder="Napište váš nick..." value="Anonymní dárce">
+    <label for="nickname">Vaše jméno / Nickname:</label>
+    <input type="text" id="nickname" placeholder="Napište váš nick..." value="Anonymní dárce">
 
-    <label for="customAmount">Částka (Kč):</label>
-    <input type="number" id="customAmount" value="100" min="10">
+    <label>Vyberte nebo zadejte částku (Kč):</label>
+    <div class="amounts-grid">
+      <button class="amount-btn" onclick="setAmount(50)">50 Kč</button>
+      <button class="amount-btn active" onclick="setAmount(100)">100 Kč</button>
+      <button class="amount-btn" onclick="setAmount(200)">200 Kč</button>
+      <button class="amount-btn" onclick="setAmount(500)">500 Kč</button>
+      <button class="amount-btn" onclick="setAmount(1000)">1000 Kč</button>
+      <button class="amount-btn" onclick="setAmount(2000)">2000 Kč</button>
+    </div>
+    <input type="number" id="customAmount" value="100" min="1" style="margin-top: 10px;" oninput="clearActiveButtons()">
 
-    <button class="btn" onclick="generateQR()">Vygenerovat QR kód</button>
+    <button class="btn" onclick="generateQR()">Vygenerovat QR platbu</button>
 
     <div id="qrContainer" style="display: none;">
       <p style="font-size: 14px; color: #a1a1aa; margin-top: 15px;">Naskenujte v aplikaci své banky:</p>
       <img id="qrCode" src="" alt="QR platba">
-      <br>
-      <button class="btn" id="sendAlertBtn" style="background-color: #22c55e; margin-top: 15px;" onclick="sendAlert()">Odeslat alert na stream 🚀</button>
     </div>
   </div>
 
   <script>
-    const RENDER_BACKEND_URL = 'https://se-alert-backend.onrender.com/send-alert';
+    function setAmount(val) {
+      document.getElementById('customAmount').value = val;
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function clearActiveButtons() {
+      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+    }
 
     function generateQR() {
       const amount = document.getElementById('customAmount').value || '100';
-      const note = document.getElementById('note').value.trim() || 'Podpora streamu';
+      const nickname = document.getElementById('nickname').value.trim() || 'Podpora streamu';
+      const message = `Podpora: ${nickname}`;
 
+      // Sem si můžeš případně upravit svůj IBAN, pokud ho chceš mít v QR kódu
       const iban = "CZ8907100000000123456789"; 
-      const spdString = `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*MSG:${encodeURIComponent(note)}`;
+      const spdString = `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*MSG:${encodeURIComponent(message)}`;
       
       const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(spdString)}`;
 
       document.getElementById('qrCode').src = qrApiUrl;
       document.getElementById('qrContainer').style.display = 'block';
-    }
-
-    async function sendAlert() {
-      const btn = document.getElementById('sendAlertBtn');
-      const username = document.getElementById('note').value.trim() || 'Anonymní dárce';
-      const amount = document.getElementById('customAmount').value || '100';
-
-      btn.disabled = true;
-      btn.innerText = "Odesílám alert...";
-
-      try {
-        const response = await fetch(RENDER_BACKEND_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: username,
-            amount: parseFloat(amount),
-            message: `Zaplaceno přes QR kód (${amount} Kč)`
-          })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          alert("Alert byl úspěšně odeslán na stream! 🚀");
-        } else {
-          alert(`Chyba: ${result.error || 'Neznámá chyba serveru'}`);
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Nepodařilo se spojit se serverem.");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Odeslat alert na stream 🚀";
-      }
     }
   </script>
 </body>
