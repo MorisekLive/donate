@@ -101,15 +101,12 @@
   </div>
 
   <script>
-    // Nová URL adresa běžícího backendu na Renderu
     const RENDER_BACKEND_URL = 'https://se-alert-backend.onrender.com/send-alert';
 
     function generateQR() {
       const amount = document.getElementById('customAmount').value || '100';
       const note = document.getElementById('note').value.trim() || 'Podpora streamu';
 
-      // Úprava pro formát CZ QR platby (SPD)
-      // Nahraď CZ8907100000000123456789 za svůj skutečný IBAN
       const iban = "CZ8907100000000123456789"; 
       const spdString = `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*MSG:${encodeURIComponent(note)}`;
       
@@ -140,15 +137,14 @@
 
         const result = await response.json();
 
-        if (result.success) {
+        if (response.ok && result.success) {
           alert("Alert byl úspěšně odeslán na stream! 🚀");
         } else {
-          console.log("Detail odpovědi:", result);
-          alert(`Chyba: ${result.error || JSON.stringify(result.apiResponse || result)}`);
+          alert(`Chyba: ${result.error || 'Neznámá chyba serveru'}`);
         }
       } catch (err) {
         console.error(err);
-        alert("Nepodařilo se spojit s alert serverem.");
+        alert("Nepodařilo se spojit se serverem.");
       } finally {
         btn.disabled = false;
         btn.innerText = "Odeslat alert na stream 🚀";
