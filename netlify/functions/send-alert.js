@@ -5,31 +5,43 @@ exports.handler = async function (event, context) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
   };
 
+  // Ošetření CORS preflight dotazu
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
-      headers: headers,
+      headers,
       body: 'OK'
     };
   }
 
   try {
-    const data = JSON.parse(event.body || '{}');
+    let data = {};
+    try {
+      data = JSON.parse(event.body || '{}');
+    } catch (e) {
+      data = {};
+    }
+
     const username = data.username || 'Anonymní dárce';
     const amount = parseFloat(data.amount) || 0;
     const message = data.message || '';
 
     const token = process.env.SE_JWT_TOKEN;
+    const channelId = process.env.SE_CHANNEL_ID;
 
-    if (!token) {
+    if (!token || !channelId) {
       return {
         statusCode: 200,
-        headers: headers,
-        body: JSON.stringify({ error: 'Chybí SE_JWT_TOKEN v nastavení Netlify.' })
+        headers,
+        body: JSON.stringify({ 
+          success: false, 
+          error: 'Chybí SE_JWT_TOKEN nebo SE_CHANNEL_ID v Netlify!' 
+        })
       };
     }
 
-    const response = await fetch('https://api.streamelements.com/kappa/v2/tips/upload', {
+    // Volání StreamElements API
+    const response = await fetch(`https://api.streamelements.com/kappa/v2/tips/${channelId}/upload`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -48,14 +60,18 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      headers: headers,
-      body: JSON.stringify(resData)
+      headers,
+      body: JSON.stringify({ 
+        success: response.ok, 
+        status: response.status,
+        data: resData 
+      })
     };
   } catch (err) {
     return {
       statusCode: 200,
-      headers: headers,
-      body: JSON.stringify({ error: err.message })
+      headers,
+      body: JSON.stringify({ success: false, error: err.message })
     };
   }
 };
