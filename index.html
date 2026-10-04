@@ -2,159 +2,208 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Podpora streamu - QR platba</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podpora tvorby – QR Donate</title>
   <style>
+    :root {
+      --bg: #121212;
+      --card-bg: rgba(36, 36, 36, 0.92); /* Průhlednější karta, aby pod ní vyniklo pozadí */
+      --accent: #d4af37;
+      --accent-hover: #f59e0b;
+      --text: #f8fafc;
+      --text-dim: #a1a1aa;
+      --input-bg: #18181b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #18181b;
-      /* Pokud chceš vlastní obrázek na pozadí, odkomentuj řádek níže a vlož odkaz/soubor */
-      /* background-image: url('pozadi.jpg'); */
+      background-color: var(--bg);
+      
+      /* OBRÁZEK NA POZADÍ "offline new.png" */
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                  url('offline new.png') no-repeat center center fixed;
       background-size: cover;
-      background-position: center;
-      color: #ffffff;
+      
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
       padding: 20px;
-      box-sizing: border-box;
     }
+
     .card {
-      background-color: rgba(39, 39, 42, 0.95);
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      max-width: 400px;
+      border-radius: 16px;
+      max-width: 440px;
       width: 100%;
       text-align: center;
-      backdrop-filter: blur(5px);
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #fff;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      text-align: left;
-      font-size: 14px;
-      color: #a1a1aa;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(0, 0, 0, 0.5);
       border: 1px solid #3f3f46;
-      background-color: #18181b;
-      color: #ffffff;
-      box-sizing: border-box;
-      font-size: 16px;
     }
-    .amounts-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 8px;
+
+    h1 { 
+      font-size: 1.5rem; 
+      margin-bottom: 8px; 
+      color: var(--text);
     }
-    .amount-btn {
-      padding: 10px;
-      border: 1px solid #3f3f46;
-      border-radius: 6px;
-      background-color: #18181b;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
+
+    p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+
+    .amounts { 
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 8px; 
+      margin-bottom: 15px; 
+      justify-content: center;
     }
-    .amount-btn:hover, .amount-btn.active {
-      background-color: #9146ff;
-      border-color: #9146ff;
+
+    .btn { 
+      flex: 1 1 17%;
+      min-width: 60px;
+      background: var(--input-bg); 
+      color: var(--text); 
+      border: 1px solid #3f3f46; 
+      padding: 10px 4px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      transition: all 0.2s ease; 
+      font-size: 0.85rem;
     }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 6px;
-      background-color: #9146ff;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
+
+    .btn:hover, .btn.active { 
+      background: var(--accent); 
+      color: #000; 
+      border-color: var(--accent-hover); 
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
     }
-    .btn:hover {
-      background-color: #772ce8;
+
+    input { 
+      width: 100%; 
+      padding: 12px; 
+      border-radius: 8px; 
+      border: 1px solid #3f3f46; 
+      background: var(--input-bg); 
+      color: var(--text); 
+      margin-bottom: 12px; 
+      font-size: 1rem; 
+      text-align: center; 
+      transition: border-color 0.2s;
     }
-    #qrContainer {
-      margin-top: 20px;
+
+    input:focus { 
+      outline: none; 
+      border-color: var(--accent); 
     }
-    #qrCode {
-      max-width: 220px;
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      background: #fff;
-      padding: 10px;
+
+    .qr-container { 
+      background: white; 
+      padding: 15px; 
+      border-radius: 12px; 
+      display: inline-block; 
+      margin-bottom: 15px; 
+      min-width: 210px; 
+      min-height: 210px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    #qrImage { display: block; margin: 0 auto; width: 180px; height: 180px; }
+
+    .account-info { 
+      background: var(--input-bg); 
+      padding: 12px; 
+      border-radius: 8px; 
+      font-size: 0.85rem; 
+      word-break: break-all; 
+      margin-bottom: 15px; 
+      color: var(--text-dim); 
+      border: 1px solid #27272a; 
+    }
+
+    .account-info strong {
+      color: var(--accent);
+    }
+
+    .copy-btn { 
+      background: transparent; 
+      border: 1px solid var(--accent); 
+      color: var(--accent); 
+      padding: 10px 16px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      width: 100%; 
+      transition: all 0.2s ease; 
+    }
+
+    .copy-btn:hover { 
+      background: var(--accent); 
+      color: #000; 
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h1>Podpořit stream 💜</h1>
+    <h1>Podpoř stream 👑</h1>
+    <p>Naskenuj QR kód ve své bankovní aplikaci</p>
 
-    <label for="nickname">Vaše jméno / Nickname:</label>
-    <input type="text" id="nickname" placeholder="Napište váš nick..." value="Anonymní dárce">
-
-    <label>Vyberte nebo zadejte částku (Kč):</label>
-    <div class="amounts-grid">
-      <button class="amount-btn" onclick="setAmount(50)">50 Kč</button>
-      <button class="amount-btn active" onclick="setAmount(100)">100 Kč</button>
-      <button class="amount-btn" onclick="setAmount(200)">200 Kč</button>
-      <button class="amount-btn" onclick="setAmount(500)">500 Kč</button>
-      <button class="amount-btn" onclick="setAmount(1000)">1000 Kč</button>
-      <button class="amount-btn" onclick="setAmount(2000)">2000 Kč</button>
+    <div class="amounts">
+      <button class="btn" onclick="setAmount(25, this)">25 Kč</button>
+      <button class="btn" onclick="setAmount(50, this)">50 Kč</button>
+      <button class="btn active" onclick="setAmount(100, this)">100 Kč</button>
+      <button class="btn" onclick="setAmount(200, this)">200 Kč</button>
+      <button class="btn" onclick="setAmount(500, this)">500 Kč</button>
     </div>
-    <input type="number" id="customAmount" value="100" min="1" style="margin-top: 10px;" oninput="clearActiveButtons()">
 
-    <button class="btn" onclick="generateQR()">Vygenerovat QR platbu</button>
+    <input type="number" id="customAmount" value="100" placeholder="Vlastní částka (Kč)" oninput="updateQR()">
+    <input type="text" id="note" placeholder="Tvoje jméno / vzkaz" oninput="updateQR()">
 
-    <div id="qrContainer" style="display: none;">
-      <p style="font-size: 14px; color: #a1a1aa; margin-top: 15px;">Naskenujte v aplikaci své banky:</p>
-      <img id="qrCode" src="" alt="QR platba">
+    <div class="qr-container">
+      <img id="qrImage" src="" alt="QR Kód pro platbu">
     </div>
+
+    <div class="account-info">
+      Účet: <strong id="ibanDisplay">CZ6601000000436651400267</strong>
+    </div>
+
+    <button class="copy-btn" onclick="copyIban()">Zkopírovat číslo účtu</button>
   </div>
 
   <script>
-    function setAmount(val) {
+    const MY_IBAN = "CZ6601000000436651400267";
+
+    document.getElementById('ibanDisplay').innerText = MY_IBAN;
+
+    function setAmount(val, btnElement) {
       document.getElementById('customAmount').value = val;
-      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+      if(btnElement) btnElement.classList.add('active');
+      updateQR();
     }
 
-    function clearActiveButtons() {
-      document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-    }
-
-    function generateQR() {
-      const amount = document.getElementById('customAmount').value || '100';
-      const nickname = document.getElementById('nickname').value.trim() || 'Podpora streamu';
-      const message = `Podpora: ${nickname}`;
-
-      // Sem si můžeš případně upravit svůj IBAN, pokud ho chceš mít v QR kódu
-      const iban = "CZ8907100000000123456789"; 
-      const spdString = `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*MSG:${encodeURIComponent(message)}`;
+    function updateQR() {
+      let amount = document.getElementById('customAmount').value || 1;
+      let note = document.getElementById('note').value || 'Donate ze streamu';
       
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(spdString)}`;
-
-      document.getElementById('qrCode').src = qrApiUrl;
-      document.getElementById('qrContainer').style.display = 'block';
+      let spdString = `SPD*1.0*ACC:${MY_IBAN}*AM:${parseFloat(amount).toFixed(2)}*CC:CZK*MSG:${note.substring(0, 60)}`;
+      
+      let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(spdString)}`;
+      document.getElementById('qrImage').src = qrUrl;
     }
+
+    function copyIban() {
+      navigator.clipboard.writeText(MY_IBAN);
+      alert("Číslo účtu zkopírováno!");
+    }
+
+    updateQR();
   </script>
+
 </body>
 </html>
