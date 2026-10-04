@@ -14,7 +14,9 @@
       --text-dim: #a1a1aa;
       --input-bg: #18181b;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
     body {
       background-color: var(--bg);
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
@@ -27,6 +29,7 @@
       min-height: 100vh;
       padding: 20px;
     }
+
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(8px);
@@ -35,30 +38,95 @@
       max-width: 440px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.85), 0 0 15px rgba(0, 0, 0, 0.5);
       border: 1px solid #3f3f46;
     }
-    h1 { font-size: 1.5rem; margin-bottom: 8px; color: var(--text); }
+
+    h1 { 
+      font-size: 1.5rem; 
+      margin-bottom: 8px; 
+      color: var(--text);
+    }
+
     p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
-    .amounts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; justify-content: center; }
+
+    .amounts { 
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 8px; 
+      margin-bottom: 15px; 
+      justify-content: center;
+    }
+
     .btn { 
-      flex: 1 1 17%; min-width: 60px; background: var(--input-bg); color: var(--text); 
-      border: 1px solid #3f3f46; padding: 10px 4px; border-radius: 8px; cursor: pointer; 
-      font-weight: bold; transition: all 0.2s ease; font-size: 0.85rem;
+      flex: 1 1 17%;
+      min-width: 60px;
+      background: var(--input-bg); 
+      color: var(--text); 
+      border: 1px solid #3f3f46; 
+      padding: 10px 4px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      transition: all 0.2s ease; 
+      font-size: 0.85rem;
     }
-    .btn:hover, .btn.active { background: var(--accent); color: #000; border-color: var(--accent-hover); }
+
+    .btn:hover, .btn.active { 
+      background: var(--accent); 
+      color: #000; 
+      border-color: var(--accent-hover); 
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    }
+
     input { 
-      width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #3f3f46; 
-      background: var(--input-bg); color: var(--text); margin-bottom: 12px; font-size: 1rem; text-align: center; 
+      width: 100%; 
+      padding: 12px; 
+      border-radius: 8px; 
+      border: 1px solid #3f3f46; 
+      background: var(--input-bg); 
+      color: var(--text); 
+      margin-bottom: 12px; 
+      font-size: 1rem; 
+      text-align: center; 
+      transition: border-color 0.2s;
     }
-    input:focus { outline: none; border-color: var(--accent); }
-    .qr-container { background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
+
+    input:focus { 
+      outline: none; 
+      border-color: var(--accent); 
+    }
+
+    .qr-container { 
+      background: white; 
+      padding: 15px; 
+      border-radius: 12px; 
+      display: inline-block; 
+      margin-bottom: 15px; 
+      min-width: 210px; 
+      min-height: 210px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
     #qrImage { display: block; margin: 0 auto; width: 180px; height: 180px; }
+
     .close-btn { 
-      background: var(--accent); border: none; color: #000; padding: 12px 16px; 
-      border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem; transition: 0.2s;
+      background: var(--accent); 
+      border: none; 
+      color: #000; 
+      padding: 12px 16px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      width: 100%; 
+      transition: all 0.2s ease; 
+      font-size: 1rem;
     }
-    .close-btn:hover { background: var(--accent-hover); }
+
+    .close-btn:hover { 
+      background: var(--accent-hover); 
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+    }
   </style>
 </head>
 <body>
@@ -87,6 +155,7 @@
 
   <script>
     const MY_IBAN = "CZ6601000000436651400267";
+    const alertChannel = new BroadcastChannel('stream_donate_channel');
 
     function setAmount(val, btnElement) {
       document.getElementById('customAmount').value = val;
@@ -98,7 +167,9 @@
     function updateQR() {
       let amount = document.getElementById('customAmount').value || 1;
       let note = document.getElementById('note').value || 'Donate ze streamu';
+      
       let spdString = `SPD*1.0*ACC:${MY_IBAN}*AM:${parseFloat(amount).toFixed(2)}*CC:CZK*MSG:${note.substring(0, 60)}`;
+      
       let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(spdString)}`;
       document.getElementById('qrImage').src = qrUrl;
     }
@@ -107,18 +178,18 @@
       const name = document.getElementById('note').value.trim() || "Anonymní dárce";
       const amount = document.getElementById('customAmount').value || "100";
 
-      // Uloží alert do paměti prohlížeče, odkud si ho OBS widget hned vyzvedne
-      const alertData = { name: name, amount: amount, time: Date.now() };
-      localStorage.setItem('stream_alert', JSON.stringify(alertData));
+      // Odešle signál do OBS okna
+      alertChannel.postMessage({ name: name, amount: amount });
 
-      // Pokus o zavření okna + pojistka
+      // Pokusí se zavřít okno + pojistka
       window.close();
       setTimeout(() => {
-        document.body.innerHTML = '<div style="color: white; text-align: center; padding-top: 40vh; font-family: sans-serif;"><h2>Díky za podporu! 💜</h2><p>Okno můžeš zavřít.</p></div>';
+        document.body.innerHTML = '<div style="color: white; text-align: center; padding-top: 40vh; font-family: sans-serif;"><h2>Díky za podporu! 💜</h2><p>Okno můžeš nyní zavřít.</p></div>';
       }, 100);
     }
 
     updateQR();
   </script>
+
 </body>
 </html>
