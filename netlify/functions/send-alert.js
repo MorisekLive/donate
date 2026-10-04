@@ -5,13 +5,8 @@ exports.handler = async function (event, context) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
   };
 
-  // Ošetření CORS preflight dotazu
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: 'OK'
-    };
+    return { statusCode: 200, headers, body: 'OK' };
   }
 
   try {
@@ -35,12 +30,11 @@ exports.handler = async function (event, context) {
         headers,
         body: JSON.stringify({ 
           success: false, 
-          error: 'Chybí SE_JWT_TOKEN nebo SE_CHANNEL_ID v Netlify!' 
+          error: `Chybí proměnné v Netlify! Token: ${!!token}, ChannelID: ${!!channelId}` 
         })
       };
     }
 
-    // Volání StreamElements API
     const response = await fetch(`https://api.streamelements.com/kappa/v2/tips/${channelId}/upload`, {
       method: 'POST',
       headers: {
@@ -61,10 +55,10 @@ exports.handler = async function (event, context) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ 
-        success: response.ok, 
+      body: JSON.stringify({
+        success: response.ok,
         status: response.status,
-        data: resData 
+        apiResponse: resData
       })
     };
   } catch (err) {
