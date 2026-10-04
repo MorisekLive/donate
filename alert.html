@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      background: transparent;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    .alert-box {
+      position: absolute;
+      top: 50px;
+      left: 50px;
+      background: linear-gradient(135deg, #18181b, #27272a);
+      border: 2px solid #d4af37;
+      color: #fff;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      text-align: center;
+      width: 350px;
+      opacity: 0;
+      transform: translateY(-30px) scale(0.9);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .alert-box.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .title { color: #d4af37; font-size: 1rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+    .name { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+    .amount { font-size: 1.6rem; color: #4ade80; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div id="alertBox" class="alert-box">
+    <div class="title">Nová podpora streamu 💜</div>
+    <div id="donorName" class="name">Jméno</div>
+    <div id="donorAmount" class="amount">0 Kč</div>
+  </div>
+
+  <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+  <script>
+    // Sleduje, jestli někdo neodeslal platební formulář
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'stream_alert' && event.newValue) {
+        const data = JSON.parse(event.newValue);
+        showAlert(data.name, data.amount);
+      }
+    });
+
+    function showAlert(name, amount) {
+      const box = document.getElementById('alertBox');
+      document.getElementById('donorName').innerText = name;
+      document.getElementById('donorAmount').innerText = amount + " Kč";
+
+      // Přehrát zvuk
+      const sound = document.getElementById('alertSound');
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Audio zablokováno prohlížečem"));
+
+      // Zobrazit alert
+      box.classList.add('show');
+
+      // Skrýt po 7 vteřinách
+      setTimeout(() => {
+        box.classList.remove('show');
+      }, 7000);
+    }
+  </script>
+</body>
+</html>
