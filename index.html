@@ -101,14 +101,15 @@
   </div>
 
   <script>
-    const NETLIFY_FUNCTION_URL = '/.netlify/functions/send-alert';
+    // Nová URL adresa běžícího backendu na Renderu
+    const RENDER_BACKEND_URL = 'https://se-alert-backend.onrender.com/send-alert';
 
     function generateQR() {
       const amount = document.getElementById('customAmount').value || '100';
       const note = document.getElementById('note').value.trim() || 'Podpora streamu';
 
       // Úprava pro formát CZ QR platby (SPD)
-      // Nahraď CZ8907100000000123456789 za svůj IBAN, pokud ho chceš mít napevno v QR kódu
+      // Nahraď CZ8907100000000123456789 za svůj skutečný IBAN
       const iban = "CZ8907100000000123456789"; 
       const spdString = `SPD*1.0*ACC:${iban}*AM:${amount}*CC:CZK*MSG:${encodeURIComponent(note)}`;
       
@@ -127,9 +128,9 @@
       btn.innerText = "Odesílám alert...";
 
       try {
-        const response = await fetch(NETLIFY_FUNCTION_URL, {
+        const response = await fetch(RENDER_BACKEND_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: username,
             amount: parseFloat(amount),
