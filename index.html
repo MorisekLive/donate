@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podpora tvorby – QR Donate</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #9333ea;
+      --accent-hover: #7e22ce;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: var(--card-bg); padding: 30px; border-radius: 16px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+    .amounts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+    .btn { background: #334155; color: var(--text); border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn:hover, .btn.active { background: var(--accent); }
+    input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: var(--text); margin-bottom: 15px; font-size: 1rem; text-align: center; }
+    .qr-container { background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
+    #qrcode img { display: block; margin: 0 auto; }
+    .account-info { background: #0f172a; padding: 12px; border-radius: 8px; font-size: 0.85rem; word-break: break-all; margin-bottom: 15px; color: var(--text-dim); }
+    .copy-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    .copy-btn:hover { background: var(--accent); color: white; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Podpoř stream 💜</h1>
+    <p>Naskenuj QR kód ve své bankovní aplikaci</p>
+
+    <div class="amounts">
+      <button class="btn" onclick="setAmount(50)">50 Kč</button>
+      <button class="btn active" onclick="setAmount(100)">100 Kč</button>
+      <button class="btn" onclick="setAmount(200)">200 Kč</button>
+    </div>
+
+    <input type="number" id="customAmount" value="100" placeholder="Vlastní částka (Kč)" oninput="updateQR()">
+    <input type="text" id="note" placeholder="Tvoje jméno / vzkaz" oninput="updateQR()">
+
+    <div class="qr-container">
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="account-info">
+      Účet: <strong id="ibanDisplay">CZ6601000000436651400267</strong>
+    </div>
+
+    <button class="copy-btn" onclick="copyIban()">Zkopírovat číslo účtu</button>
+  </div>
+
+  <script>
+    // SEM VLOŽ SVOJE ČÍSLO ÚČTU V IBAN TVARU (např. CZ1234567890000000000000)
+    const MY_IBAN = "DOPLŇ_MŮJ_IBAN";
+
+    document.getElementById('ibanDisplay').innerText = MY_IBAN;
+    let qr = new QRCode(document.getElementById("qrcode"), { width: 180, height: 180 });
+
+    function setAmount(val) {
+      document.getElementById('customAmount').value = val;
+      document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      updateQR();
+    }
+
+    function updateQR() {
+      let amount = document.getElementById('customAmount').value || 0;
+      let note = document.getElementById('note').value || 'Donate ze streamu';
+      
+      // České rozhraní SPD pro bankovní QR kód
+      let spdString = `SPD*1.0*ACC:${MY_IBAN}*AM:${parseFloat(amount).toFixed(2)}*CC:CZK*MSG:${note.substring(0, 60)}`;
+      
+      qr.clear();
+      qr.makeCode(spdString);
+    }
+
+    function copyIban() {
+      navigator.clipboard.writeText(MY_IBAN);
+      alert("Číslo účtu zkopírováno!");
+    }
+
+    // Inicializace prvního QR kódu
+    updateQR();
+  </script>
+
+</body>
+</html>
