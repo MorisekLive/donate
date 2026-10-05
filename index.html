@@ -20,7 +20,7 @@
     body {
       background-color: var(--bg);
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                url('offline new.png') no-repeat center center fixed;
+                  url('offline new.png') no-repeat center center fixed;
       background-size: cover;
       color: var(--text);
       display: flex;
@@ -154,7 +154,8 @@
   </div>
 
   <script>
-    const MY_IBAN = "CZ6601000000436651400267";
+    // Změněný IBAN bez mezer (nutné pro správný QR kód dle standardu SPD)
+    const MY_IBAN = "CZ3030300000003737398010";
     const alertChannel = new BroadcastChannel('stream_donate_channel');
 
     function setAmount(val, btnElement) {
